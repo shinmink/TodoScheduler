@@ -4,12 +4,12 @@ import com.sparta.todoscheduler.dto.TodoSchedulerRequestDto;
 import com.sparta.todoscheduler.dto.TodoSchedulerResponseDto;
 import com.sparta.todoscheduler.entity.TodoScheduler;
 import com.sparta.todoscheduler.repository.TodoSchedulerRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import org.springframework.http.HttpStatus;
-
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TodoSchedulerService {
@@ -21,58 +21,40 @@ public class TodoSchedulerService {
     }
 
     public TodoSchedulerResponseDto createScheduler(TodoSchedulerRequestDto requestDto) {
-        TodoScheduler todoscheduler = new TodoScheduler(requestDto);
-        Long id = todoSchedulerRepository.save(todoscheduler);
-        todoscheduler.setId(id);
-        return new TodoSchedulerResponseDto(todoscheduler);
+        TodoScheduler todoScheduler = new TodoScheduler(requestDto);
+        TodoScheduler savedScheduler = todoSchedulerRepository.save(todoScheduler);
+        return new TodoSchedulerResponseDto(savedScheduler);
     }
 
     public List<TodoSchedulerResponseDto> getSchedulers() {
-        return todoSchedulerRepository.findAll();
+        return todoSchedulerRepository.findAll()
+                .stream()
+                .map(TodoSchedulerResponseDto::new)
+                .collect(Collectors.toList());
     }
 
-    public Long updateScheduler(Long id, TodoSchedulerRequestDto requestDto) {
-        TodoScheduler todoscheduler = todoSchedulerRepository.findById(id);
-        if (todoscheduler != null) {
-            if (!todoscheduler.getPassword().equals(requestDto.getPassword())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "비밀번호가 올바르지 않습니다.");
-            }
-            validateRequestDto(requestDto);
-            todoSchedulerRepository.update(id, requestDto);
-            return id;
-        } else {
-            throw new IllegalArgumentException("선택한 일정은 존재하지 않습니다.");
+    public TodoSchedulerResponseDto updateScheduler(Long id, TodoSchedulerRequestDto requestDto) {
+        TodoScheduler todoScheduler = todoSchedulerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("선택한 일정은 존재하지 않습니다."));
+
+        if (!todoScheduler.getPassword().equals(requestDto.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "비밀번호가 올바르지 않습니다.");
         }
+
+        todoScheduler.update(requestDto);
+        TodoScheduler updatedScheduler = todoSchedulerRepository.save(todoScheduler);
+
+        return new TodoSchedulerResponseDto(updatedScheduler);
     }
 
-    public Long deleteScheduler(Long id, TodoSchedulerRequestDto requestDto) {
-        TodoScheduler todoscheduler = todoSchedulerRepository.findById(id);
-        if (todoscheduler != null) {
-            if (!todoscheduler.getPassword().equals(requestDto.getPassword())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "비밀번호가 올바르지 않습니다.");
-            }
-            todoSchedulerRepository.delete(id);
-            return id;
-        } else {
-            throw new IllegalArgumentException("선택한 일정은 존재하지 않습니다.");
-        }
-    }
+    public void deleteScheduler(Long id, String password) {
+        TodoScheduler todoScheduler = todoSchedulerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("선택한 일정은 존재하지 않습니다."));
 
-    private void validateRequestDto(TodoSchedulerRequestDto requestDto) {
-        if (requestDto.getTitle() == null || requestDto.getTitle().isEmpty()) {
-            throw new IllegalArgumentException("Title cannot be null or empty");
+        if (!todoScheduler.getPassword().equals(password)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "비밀번호가 올바르지 않습니다.");
         }
-        if (requestDto.getContents() == null || requestDto.getContents().isEmpty()) {
-            throw new IllegalArgumentException("Contents cannot be null or empty");
-        }
-        if (requestDto.getUsername() == null || requestDto.getUsername().isEmpty()) {
-            throw new IllegalArgumentException("Username cannot be null or empty");
-        }
-        if (requestDto.getPassword() == null || requestDto.getPassword().isEmpty()) {
-            throw new IllegalArgumentException("Password cannot be null or empty");
-        }
-        if (requestDto.getDate() == null) {
-            throw new IllegalArgumentException("Date cannot be null");
-        }
+
+        todoSchedulerRepository.delete(todoScheduler);
     }
 }

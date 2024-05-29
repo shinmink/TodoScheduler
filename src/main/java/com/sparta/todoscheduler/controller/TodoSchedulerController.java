@@ -28,12 +28,12 @@ public class TodoSchedulerController {
     }
 
     @PutMapping("/{id}")
-    public Long updateScheduler(@PathVariable Long id, @RequestBody TodoSchedulerRequestDto requestDto) {
+    public TodoSchedulerResponseDto updateScheduler(@PathVariable Long id, @RequestBody TodoSchedulerRequestDto requestDto) {
         return todoSchedulerService.updateScheduler(id, requestDto);
     }
 
     @DeleteMapping("/{id}")
-    public Long deleteScheduler(@PathVariable Long id, @RequestBody TodoSchedulerRequestDto requestDto) {
-        return todoSchedulerService.deleteScheduler(id, requestDto);
+    public void deleteScheduler(@PathVariable Long id, @RequestBody String password) {
+        todoSchedulerService.deleteScheduler(id, password);
     }
 }

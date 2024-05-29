@@ -4,15 +4,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.sql.Date;
-
 @Getter
 @Setter
 @NoArgsConstructor
-public class TodoSchedulerRequestDto {
-    private String title;
-    private String contents;
+public class CommentRequestDto {
+    private String content;
     private String username;
-    private String password;
-    private Date date;
+    private Long schedulerId; // 이 필드는 컨트롤러에서 설정될 것입니다.
 }

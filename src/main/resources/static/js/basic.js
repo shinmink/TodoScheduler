@@ -1,3 +1,5 @@
+// basic.js
+
 // 사용자가 내용을 올바르게 입력하였는지 확인합니다.
 function isValidContents(contents) {
     if (contents == '') {
@@ -26,7 +28,7 @@ function editPost(id) {
 }
 
 function showEdits(id) {
-    // title, content, username, date 텍스트 에어리어만 표시
+// title, content, username, date 텍스트 에어리어만 표시
     $(`#${id}-editarea-title`).show();
     $(`#${id}-editarea-content`).show();
     $(`#${id}-editarea-username`).show();
@@ -35,14 +37,14 @@ function showEdits(id) {
     $(`#${id}-submit`).show();
     $(`#${id}-delete`).show();
 
-    // 기존 텍스트는 숨김
+// 기존 텍스트는 숨김
     $(`#${id}-title`).hide();
     $(`#${id}-content`).hide();
     $(`#${id}-username`).hide();
     $(`#${id}-date`).hide();
     $(`#${id}-edit`).hide();
 
-    // 이전 값 유지
+// 이전 값 유지
     let prevTitle = $(`#${id}-title`).text().trim();
     let prevContents = $(`#${id}-content`).text().trim();
     let prevUsername = $(`#${id}-username`).text().trim();
@@ -54,10 +56,10 @@ function showEdits(id) {
 }
 
 $(document).ready(function() {
-    // HTML 문서를 로드할 때마다 실행합니다.
+// HTML 문서를 로드할 때마다 실행합니다.
     getMessages();
 
-    // 수정 버튼 클릭 시 이벤트 설정
+// 수정 버튼 클릭 시 이벤트 설정
     $(document).on("click", ".icon-start-edit", function() {
         let id = $(this).attr("id").split("-")[0];
         showEdits(id);
@@ -66,9 +68,9 @@ $(document).ready(function() {
 
 // 일정을 불러와서 보여줍니다.
 function getMessages() {
-    // 1. 기존 메모 내용을 지웁니다.
+// 1. 기존 메모 내용을 지웁니다.
     $('#cards-box').empty();
-    // 2. 일정 목록을 불러와서 HTML로 붙입니다.
+// 2. 일정 목록을 불러와서 HTML로 붙입니다.
     $.ajax({
         type: 'GET',
         url: '/api/schedulers',
@@ -88,70 +90,70 @@ function getMessages() {
 
 // 메모 하나를 HTML로 만들어서 body 태그 내 원하는 곳에 붙입니다.
 function addHTML(id, title, username, contents, date) {
-    // 1. HTML 태그를 만듭니다.
+// 1. HTML 태그를 만듭니다.
     let tempHtml = `<div class="card">
-<!-- date/username 영역 -->
-<div class="metadata">
-    <div id="${id}-date" class="date">
-        ${date}
+    <!-- date/username 영역 -->
+    <div class="metadata">
+        <div id="${id}-date" class="date">
+            ${date}
+        </div>
+        <div id="${id}-username" class="username">
+            ${username}
+        </div>
     </div>
-    <div id="${id}-username" class="username">
-        ${username}
+    <!-- title 영역 -->
+    <div class="title">
+        <div id="${id}-title" class="text">
+            ${title}
+        </div>
+        <div id="${id}-editarea-title" class="edit">
+            <textarea id="${id}-title-textarea" class="te-edit" name="" cols="30" rows="1"></textarea>
+        </div>
     </div>
-</div>
-<!-- title 영역 -->
-<div class="title">
-    <div id="${id}-title" class="text">
-        ${title}
+    <!-- contents 조회/수정 영역-->
+    <div class="contents">
+        <div id="${id}-content" class="text">
+            ${contents}
+        </div>
+        <div id="${id}-editarea-content" class="edit">
+            <textarea id="${id}-content-textarea" class="te-edit" name="" cols="30" rows="5"></textarea>
+        </div>
+        <div id="${id}-editarea-username" class="edit">
+            <textarea id="${id}-username-textarea" class="te-edit" name="" cols="30" rows="1"></textarea>
+        </div>
+        <div id="${id}-editarea-date" class="edit">
+            <input type="date" id="${id}-date-textarea" class="field-date te-edit">
+        </div>
+        <div id="${id}-editarea-password" class="edit">
+            <input type="password" id="${id}-password-textarea" class="te-edit" placeholder="비밀번호를 입력해주세요">
+        </div>
     </div>
-    <div id="${id}-editarea-title" class="edit">
-        <textarea id="${id}-title-textarea" class="te-edit" name="" cols="30" rows="1"></textarea>
+    <!-- 버튼 영역-->
+    <div class="footer">
+        <img id="${id}-edit" class="icon-start-edit" src="images/edit.png" alt="수정" onclick="editPost('${id}')">
+        <img id="${id}-delete" class="icon-delete" src="images/delete.png" alt="삭제" onclick="deleteOne('${id}')">
+        <img id="${id}-submit" class="icon-end-edit" src="images/done.png" alt="완료" onclick="submitEdit('${id}')">
     </div>
-</div>
-<!-- contents 조회/수정 영역-->
-<div class="contents">
-    <div id="${id}-content" class="text">
-        ${contents}
-    </div>
-    <div id="${id}-editarea-content" class="edit">
-        <textarea id="${id}-content-textarea" class="te-edit" name="" cols="30" rows="5"></textarea>
-    </div>
-    <div id="${id}-editarea-username" class="edit">
-        <textarea id="${id}-username-textarea" class="te-edit" name="" cols="30" rows="1"></textarea>
-    </div>
-    <div id="${id}-editarea-date" class="edit">
-        <input type="date" id="${id}-date-textarea" class="field-date te-edit">
-    </div>
-    <div id="${id}-editarea-password" class="edit">
-        <input type="password" id="${id}-password-textarea" class="te-edit" placeholder="비밀번호를 입력해주세요">
-    </div>
-</div>
-<!-- 버튼 영역-->
-<div class="footer">
-    <img id="${id}-edit" class="icon-start-edit" src="images/edit.png" alt="수정" onclick="editPost('${id}')">
-    <img id="${id}-delete" class="icon-delete" src="images/delete.png" alt="삭제" onclick="deleteOne('${id}')">
-    <img id="${id}-submit" class="icon-end-edit" src="images/done.png" alt="완료" onclick="submitEdit('${id}')">
-</div>
 </div>`;
-    // 2. #cards-box 에 HTML을 붙인다.
+// 2. #cards-box 에 HTML을 붙인다.
     $('#cards-box').append(tempHtml);
 }
 
 // 일정을 생성합니다.
 function writePost() {
-    // 1. 입력된 값을 읽어옵니다.
+// 1. 입력된 값을 읽어옵니다.
     let title = $('#title').val();
     let contents = $('#contents-textarea').val();
     let username = $('#username').val();
     let password = $('#password').val();
     let date = $('#date').val(); // 사용자가 선택한 날짜 값 읽기
 
-    // 2. 유효성 검사를 진행합니다.
+// 2. 유효성 검사를 진행합니다.
     if (!isValidContents(contents)) {
         return;
     }
 
-    // 3. 일정을 생성합니다.
+// 3. 일정을 생성합니다.
     let data = {title: title, contents: contents, username: username, password: password, date: date}; // date 포함
     $.ajax({
         type: 'POST',
@@ -159,7 +161,7 @@ function writePost() {
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: function (response) {
-            // 4. 성공하면, 일정을 목록에 추가하고 입력 필드를 초기화합니다.
+// 4. 성공하면, 일정을 목록에 추가하고 입력 필드를 초기화합니다.
             addHTML(response.id, title, username, contents, date); // date 포함
             $('#title').val('');
             $('#contents-textarea').val('');
