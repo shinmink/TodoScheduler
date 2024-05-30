@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -12,17 +13,21 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 public class Comment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // 아이디 (고유번호)
 
-    private String contents;
+    @Column(nullable = false)
+    private String content; // 댓글 내용
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(nullable = false)
+    private String userId; // 사용자 아이디
 
-    @ManyToOne
-    @JoinColumn(name = "scheduler_id", nullable = false)
-    private TodoScheduler scheduler;
+    @Column(nullable = false)
+    private Long scheduleId; // 일정 아이디
+
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdAt; // 작성일자
 }

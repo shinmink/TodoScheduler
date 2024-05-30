@@ -25,8 +25,8 @@ import java.util.List;
 @RequestMapping("/api/user")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+
+    private final UserService userService;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequestDto signupRequestDto) {
