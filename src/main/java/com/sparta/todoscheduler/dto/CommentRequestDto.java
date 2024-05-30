@@ -8,8 +8,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CommentRequestDto {
-    private String content;
-    private String username;
+    private String contents;
     private Long schedulerId;
+
 
 }

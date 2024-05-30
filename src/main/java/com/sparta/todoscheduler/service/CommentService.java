@@ -3,8 +3,14 @@ package com.sparta.todoscheduler.service;
 import com.sparta.todoscheduler.dto.CommentRequestDto;
 import com.sparta.todoscheduler.dto.CommentResponseDto;
 import com.sparta.todoscheduler.entity.Comment;
+import com.sparta.todoscheduler.entity.TodoScheduler;
+import com.sparta.todoscheduler.entity.User;
+import com.sparta.todoscheduler.entity.UserRoleEnum;
 import com.sparta.todoscheduler.repository.CommentRepository;
+import com.sparta.todoscheduler.repository.TodoSchedulerRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,38 +19,50 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class CommentService {
+    @Autowired
+    private CommentRepository commentRepository;
 
-    private final CommentRepository commentRepository;
+    @Autowired
+    private TodoSchedulerRepository todoSchedulerRepository;
 
-    @Transactional
-    public CommentResponseDto createComment(CommentRequestDto requestDto) {
+    public void createComment(CommentRequestDto requestDto, User user) {
+        TodoScheduler scheduler = todoSchedulerRepository.findById(requestDto.getSchedulerId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid scheduler Id:" + requestDto.getSchedulerId()));
         Comment comment = new Comment();
-        comment.setContent(requestDto.getContent());
-        comment.setUsername(requestDto.getUsername());
-        comment.setSchedulerId(requestDto.getSchedulerId());
-        comment.setCreatedAt(new Timestamp(System.currentTimeMillis()).toLocalDateTime());
-
-        Comment savedComment = commentRepository.save(comment);
-
-        return new CommentResponseDto(savedComment);
+        comment.setContents(requestDto.getContents());
+        comment.setUser(user);
+        comment.setScheduler(scheduler);
+        commentRepository.save(comment);
     }
 
-    @Transactional
-    public List<CommentResponseDto> getCommentsBySchedulerId(Long schedulerId) {
-        List<Comment> commentList = commentRepository.findByTodoSchedulerId(schedulerId);
-        List<CommentResponseDto> responseDtoList = new ArrayList<>();
+    public List<CommentResponseDto> getComments(Long schedulerId) {
+        List<Comment> comments = commentRepository.findBySchedulerId(schedulerId);
+        return comments.stream()
+                .map(CommentResponseDto::new)
+                .collect(Collectors.toList());
+    }
 
-        for (Comment comment : commentList) {
-            responseDtoList.add(new CommentResponseDto(comment));
+    public void updateComment(Long id, CommentRequestDto requestDto, User user) {
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid comment Id:" + id));
+        if (comment.getUser().equals(user) || user.getRole() == UserRoleEnum.ADMIN) {
+            comment.setContents(requestDto.getContents());
+            commentRepository.save(comment);
+        } else {
+            throw new AccessDeniedException("You do not have permission to update this comment");
         }
-
-        return responseDtoList;
     }
 
-    public void deleteComment(Long id) {
-        commentRepository.deleteById(id);
+    public void deleteComment(Long id, User user) {
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid comment Id:" + id));
+        if (comment.getUser().equals(user) || user.getRole() == UserRoleEnum.ADMIN) {
+            commentRepository.delete(comment);
+        } else {
+            throw new AccessDeniedException("You do not have permission to delete this comment");
+        }
     }
 }

@@ -1,10 +1,15 @@
 package com.sparta.todoscheduler.service;
 
+import com.sparta.todoscheduler.dto.LoginRequestDto;
 import com.sparta.todoscheduler.dto.SignupRequestDto;
 import com.sparta.todoscheduler.entity.User;
 import com.sparta.todoscheduler.entity.UserRoleEnum;
+import com.sparta.todoscheduler.jwt.JwtUtil;
 import com.sparta.todoscheduler.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,33 +19,35 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
 
-    // ADMIN_TOKEN
-    private final String ADMIN_TOKEN = "AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC";
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    public void signup(SignupRequestDto requestDto) {
-        String username = requestDto.getUsername();
-        String password = passwordEncoder.encode(requestDto.getPassword());
+    @Autowired
+    private JwtUtil jwtUtil;
 
-        // 회원 중복 확인
-        Optional<User> checkUsername = userRepository.findByUsername(username);
-        if (checkUsername.isPresent()) {
-            throw new IllegalArgumentException("중복된 사용자가 존재합니다.");
-        }
+    public void signup(SignupRequestDto signupRequestDto) {
+        String username = signupRequestDto.getUsername();
+        String password = passwordEncoder.encode(signupRequestDto.getPassword());
+        UserRoleEnum role = signupRequestDto.isAdmin() ? UserRoleEnum.ADMIN : UserRoleEnum.USER;
 
-        // 사용자 ROLE 확인
-        UserRoleEnum role = UserRoleEnum.USER;
-        if (requestDto.isAdmin()) {
-            if (!ADMIN_TOKEN.equals(requestDto.getAdminToken())) {
-                throw new IllegalArgumentException("관리자 암호가 틀려 등록이 불가능합니다.");
-            }
-            role = UserRoleEnum.ADMIN;
-        }
-
-        // 사용자 등록
         User user = new User(username, password, role);
         userRepository.save(user);
+    }
+
+    public String login(LoginRequestDto loginRequestDto) {
+        String username = loginRequestDto.getUsername();
+        String password = loginRequestDto.getPassword();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new BadCredentialsException("Invalid password");
+        }
+
+        return jwtUtil.getUsernameFromToken(username);
     }
 }
