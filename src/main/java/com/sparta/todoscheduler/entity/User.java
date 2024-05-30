@@ -1,9 +1,14 @@
 package com.sparta.todoscheduler.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -13,17 +18,22 @@ import lombok.Setter;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String username;
-    private String password;
+    private Long id; // 아이디 (고유번호)
 
-    @Enumerated(EnumType.STRING)
-    private UserRoleEnum role;
+    @Column(nullable = false, unique = true)
+    private String nickname; // 별명
 
-    public User(String username, String password, UserRoleEnum role) {
-        this.username = username;
-        this.password = password;
-        this.role = role;
-    }
+    @Column(nullable = false, unique = true)
+    private String username; // 사용자이름
+
+    @Column(nullable = false)
+    private String password; // 비밀번호
+
+    @Column(nullable = false)
+    private String role; // 권한 (일반, 어드민)
+
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdAt; // 생성일자
 
 }

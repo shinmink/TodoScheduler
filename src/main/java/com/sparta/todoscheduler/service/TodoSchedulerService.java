@@ -12,6 +12,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -40,7 +41,7 @@ public class TodoSchedulerService {
     public void updateScheduler(Long id, TodoSchedulerRequestDto requestDto, User user) {
         TodoScheduler scheduler = todoSchedulerRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid scheduler Id:" + id));
-        if (scheduler.getUser().equals(user) || user.getRole() == UserRoleEnum.ADMIN) {
+        if (scheduler.getUser().equals(user) || Objects.equals(user.getRole(), UserRoleEnum.ADMIN.toString())) {
             scheduler.setTitle(requestDto.getTitle());
             scheduler.setContents(requestDto.getContents());
             scheduler.setDate(requestDto.getDate());
@@ -53,7 +54,7 @@ public class TodoSchedulerService {
     public void deleteScheduler(Long id, User user) {
         TodoScheduler scheduler = todoSchedulerRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid scheduler Id:" + id));
-        if (scheduler.getUser().equals(user) || user.getRole() == UserRoleEnum.ADMIN) {
+        if (scheduler.getUser().equals(user) || Objects.equals(user.getRole(), UserRoleEnum.ADMIN.toString())) {
             todoSchedulerRepository.delete(scheduler);
         } else {
             throw new AccessDeniedException("You do not have permission to delete this scheduler");
