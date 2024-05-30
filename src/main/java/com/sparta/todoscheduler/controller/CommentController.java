@@ -3,32 +3,30 @@ package com.sparta.todoscheduler.controller;
 import com.sparta.todoscheduler.dto.CommentRequestDto;
 import com.sparta.todoscheduler.dto.CommentResponseDto;
 import com.sparta.todoscheduler.service.CommentService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/schedulers/{schedulerId}/comments")
+@RequestMapping("/api/schedulers")
+@RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
 
-    public CommentController(CommentService commentService) {
-        this.commentService = commentService;
-    }
-
-    @PostMapping
+    @PostMapping("{schedulerId}/comments")
     public CommentResponseDto createComment(@PathVariable Long schedulerId, @RequestBody CommentRequestDto requestDto) {
         requestDto.setSchedulerId(schedulerId);
         return commentService.createComment(requestDto);
     }
 
-    @GetMapping
+    @GetMapping("{schedulerId}/comments")
     public List<CommentResponseDto> getComments(@PathVariable Long schedulerId) {
         return commentService.getCommentsBySchedulerId(schedulerId);
     }
 
-    @DeleteMapping("/{commentId}")
+    @DeleteMapping("{schedulerId}/comments/{commentId}")
     public void deleteComment(@PathVariable Long schedulerId, @PathVariable Long commentId) {
         commentService.deleteComment(commentId);
     }

@@ -5,43 +5,49 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
+
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
+@Table(name = "todoschedulers")
 @NoArgsConstructor
 public class TodoScheduler {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
+
+    @Column(nullable = false)
     private String contents;
-    private String username;
-    private String password;
+
+    @Column(nullable = false)
     private Date date;
 
-    @OneToMany(mappedBy = "schedulerId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @OneToMany(mappedBy = "todoScheduler", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
 
-    public TodoScheduler(TodoSchedulerRequestDto requestDto) {
+    public TodoScheduler(TodoSchedulerRequestDto requestDto, User user) {
         this.title = requestDto.getTitle();
         this.contents = requestDto.getContents();
-        this.username = requestDto.getUsername();
-        this.password = requestDto.getPassword();
         this.date = requestDto.getDate();
+        this.user = user;
+        this.comments = new ArrayList<>();
     }
-
-    // Getter and Setter methods
 
     public void update(TodoSchedulerRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.contents = requestDto.getContents();
-        this.username = requestDto.getUsername();
-        this.password = requestDto.getPassword();
         this.date = requestDto.getDate();
     }
+
 }

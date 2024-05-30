@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -21,17 +23,16 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, unique = true)
-    private String email;
-
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Enumerated(value = EnumType.STRING)
     private UserRoleEnum role;
 
-    public User(String username, String password, String email, UserRoleEnum role) {
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TodoScheduler> todoSchedulers;
+
+    public User(String username, String password, UserRoleEnum role) {
         this.username = username;
         this.password = password;
-        this.email = email;
         this.role = role;
     }
 }

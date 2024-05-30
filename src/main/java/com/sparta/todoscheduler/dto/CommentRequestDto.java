@@ -10,5 +10,6 @@ import lombok.Setter;
 public class CommentRequestDto {
     private String content;
     private String username;
-    private Long schedulerId; // 이 필드는 컨트롤러에서 설정될 것입니다.
+    private Long schedulerId;
+
 }
